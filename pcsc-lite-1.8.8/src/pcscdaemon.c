@@ -317,10 +317,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	#ifndef ANDROID
 	/*
 	 * Check if systemd passed us any file descriptors
 	 */
-	/*rv = sd_listen_fds(0);
+	rv = sd_listen_fds(0);
 	if (rv > 1)
 	{
 		Log1(PCSC_LOG_CRITICAL, "Too many file descriptors received");
@@ -335,8 +336,15 @@ int main(int argc, char **argv)
 		}
 		else
 			SocketActivated = FALSE;
-	}*/
+	}
+	#endif
 	SocketActivated = FALSE;
+	
+	#ifdef ANDROID
+	rv = stat(PCSCLITE_CSOCK_NAME, &fStatBuf);
+	if(!rv)
+		clean_temp_files();
+	#else
 	/*
 	 * test the presence of /var/run/pcscd/pcscd.comm
 	 */
@@ -395,7 +403,7 @@ int main(int argc, char **argv)
 			Log1(PCSC_LOG_CRITICAL, "Hotplug failed: pcscd is not running");
 			return EXIT_FAILURE;
 		}
-
+	#endif
 	/* like in daemon(3): changes the current working directory to the
 	 * root ("/") */
 	(void)chdir("/");
