@@ -111,7 +111,7 @@
 #define PACKAGE_VERSION "1.4.10"
 
 /* directory containing USB drivers */
-#define PCSCLITE_HP_DROPDIR "/vendor/lib/pcsc/"
+#define PCSCLITE_HP_DROPDIR "/vendor/lib/pcsc"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */

@@ -30,6 +30,11 @@
 #include <string.h>
 #include "strlcpycat.h"
 
+#ifdef ANDROID
+#define LOG_TAG "ccid"
+#include <cutils/logd.h>
+#endif
+
 #undef LOG_TO_STDERR
 
 #ifdef LOG_TO_STDERR
@@ -37,6 +42,7 @@
 #else
 #define LOG_STREAM stdout
 #endif
+
 
 void log_msg(const int priority, const char *fmt, ...)
 {
@@ -48,9 +54,12 @@ void log_msg(const int priority, const char *fmt, ...)
 	va_start(argptr, fmt);
 	(void)vsnprintf(debug_buffer, sizeof debug_buffer, fmt, argptr);
 	va_end(argptr);
-
+#ifdef ANDROID	
+	__android_log_write(ANDROID_LOG_DEBUG,LOG_TAG,debug_buffer);
+#else
 	(void)fprintf(LOG_STREAM, "%s\n", debug_buffer);
 	fflush(LOG_STREAM);
+#endif	
 } /* log_msg */
 
 void log_xxd(const int priority, const char *msg, const unsigned char *buffer,
@@ -72,6 +81,10 @@ void log_xxd(const int priority, const char *msg, const unsigned char *buffer,
 		c += 3;
 	}
 
+#ifdef ANDROID	
+	__android_log_write(ANDROID_LOG_DEBUG,LOG_TAG,debug_buffer);
+#else
 	(void)fprintf(LOG_STREAM, "%s\n", debug_buffer);
 	fflush(LOG_STREAM);
+#endif	
 } /* log_xxd */

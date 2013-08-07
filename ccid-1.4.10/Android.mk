@@ -12,7 +12,7 @@ COMMON_SOURCE := \
 	
 USB_SOURCE := src/ccid_usb.c
 
-SERIAL_SOURCE := src/ccid_serial.c
+SERIAL_SOURCE := src/ccid_serial_au9540.c
 
 T1_SOURCE := \
 	src/towitoko/atr.c \
@@ -46,7 +46,7 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE:= libccid
-LOCAL_SHARED_LIBRARIES := libc libdl libusb
+LOCAL_SHARED_LIBRARIES := libc libdl libusb liblog
 LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/lib/pcsc
 
 include $(BUILD_SHARED_LIBRARY)
@@ -86,7 +86,7 @@ LOCAL_SRC_FILES := src/Info.plist
 LOCAL_MODULE_TAGS := optional
 LCAL_MODULE_SUFFIX := .plist
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/lib/pcsc/ifd--ccid.bundle/Contents
+LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/lib/pcsc/ifd-ccid.bundle/Contents
 include $(BUILD_PREBUILT)
 
 
