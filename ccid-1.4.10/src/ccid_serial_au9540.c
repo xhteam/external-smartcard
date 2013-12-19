@@ -46,6 +46,7 @@
 #include "parser.h"
 #include "strlcpycat.h"
 
+#define COMM_DEBUG 0
 /*
  * You may get read timeout after a card movement.
  * This is because you will get the echo of the CCID command
@@ -420,8 +421,10 @@ int get_bytes(unsigned int reader_index, unsigned char *buffer, int length)
 	int offset = serialDevice[reader_index].buffer_offset;
 	int offset_last = serialDevice[reader_index].buffer_offset_last;
 
-	//DEBUG_COMM3("available: %d, needed: %d", offset_last-offset,
-	//	length);
+	#if COMM_DEBUG
+	DEBUG_COMM3("available: %d, needed: %d", offset_last-offset,
+		length);
+	#endif
 	/* enough data are available */
 	if (offset + length <= offset_last)
 	{
@@ -438,13 +441,17 @@ int get_bytes(unsigned int reader_index, unsigned char *buffer, int length)
 
 		if (present > 0)
 		{
-	//		DEBUG_COMM2("some data available: %d", present);
+			#if COMM_DEBUG
+			DEBUG_COMM2("some data available: %d", present);
+			#endif
 			memcpy(buffer, serialDevice[reader_index].buffer + offset,
 				present);
 		}
 
 		/* get fresh data */
-	//	DEBUG_COMM2("get more data: %d", length - present);
+		#if COMM_DEBUG
+		DEBUG_COMM2("get more data: %d", length - present);
+		#endif
 		rv = ReadChunk(reader_index, serialDevice[reader_index].buffer,
 			sizeof(serialDevice[reader_index].buffer), length - present);
 		if (rv < 0)
@@ -455,9 +462,11 @@ int get_bytes(unsigned int reader_index, unsigned char *buffer, int length)
 			length - present);
 		serialDevice[reader_index].buffer_offset = length - present;
 		serialDevice[reader_index].buffer_offset_last = rv;
-	//	DEBUG_COMM3("offset: %d, last_offset: %d",
-	//		serialDevice[reader_index].buffer_offset,
-	//		serialDevice[reader_index].buffer_offset_last);
+		#if COMM_DEBUG
+		DEBUG_COMM3("offset: %d, last_offset: %d",
+			serialDevice[reader_index].buffer_offset,
+			serialDevice[reader_index].buffer_offset_last);
+		#endif
 	}
 
 	return STATUS_SUCCESS;
@@ -579,9 +588,9 @@ status_t ReadSerial(unsigned int reader_index,
 	unsigned char c;
 	int rv;
 	int to_read;
-	unsigned int ext_length;
+	unsigned int ext_length=0;
 	unsigned int packet_length;
-	int basic_packet_size=AU9540_PACKET_MIN;
+	unsigned int basic_packet_size=AU9540_PACKET_MIN;
 	unsigned char lowlevel_buffer[AU9540_TWIN_MAXBUF];	
 	char debug_header[] = "<- 121234 ";
 	(void)snprintf(debug_header, sizeof(debug_header), "<- %06X ",
@@ -594,7 +603,15 @@ status_t ReadSerial(unsigned int reader_index,
 	packet_length = basic_packet_size;
 
 	ext_length = lei2i(&lowlevel_buffer[1]);
-	if(length){
+	
+#if COMM_DEBUG
+	DEBUG_COMM3("packet_length: %d ext_length: %d\n", packet_length,
+		ext_length);
+#endif
+
+
+
+	if(ext_length&&(ext_length<(AU9540_TWIN_MAXBUF-basic_packet_size))){
 		if ((rv = get_bytes(reader_index, lowlevel_buffer+basic_packet_size, ext_length)) != STATUS_SUCCESS){
 			return rv;
 		}	
